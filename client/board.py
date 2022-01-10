@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPaintEvent, QPen, QColor, QPainter
 from PyQt5.QtCore import pyqtSlot, QEvent, QRectF, Qt
 
 
-SHOT_COUNT = 5
+SHOT_COUNT = 1
 AIM = 1009
 NOTHING = 0
 HIT = 1001

@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout,QHBoxLayout, QLabel,QListWidget, QListWidgetItem, QTreeWidget, QTreeWidgetItem, QGridLayout, QGroupBox
 from PyQt5.QtCore import pyqtSlot
 
-
 class MyTabWidget(QWidget):
     def __init__(self, parent, widgetsDict, controller):
         super(QWidget, self).__init__(parent)
         self.widgetsDict = widgetsDict
+
+        self.controller = controller
 
         self.layout = QVBoxLayout(self)
         # Initialize tab screen
@@ -57,7 +58,7 @@ class MyTabWidget(QWidget):
 
 
         for key, group in tabWidgets.items():
-            if (count % 3 == 0):
+            if (count % 2 == 0):
                 cur_layout = QVBoxLayout()
                 self.tab1layout.addLayout(cur_layout)
             
@@ -84,6 +85,42 @@ class MyTabWidget(QWidget):
             print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
 
     def slotsInit(self):
-        pass
+        self.controlWidgets = self.widgetsDict['control']
+        loginButton = self.controlWidgets['login']['button']
+        loginButton.clicked.connect(self.loginPushed)
 
+        registerButton = self.controlWidgets['register']['button']
+        registerButton.clicked.connect(self.registerPushed)
+
+        connectButton = self.controlWidgets['connect']['connectbutton']
+        connectButton.clicked.connect(self.connectPushed)
+
+        closeButton = self.controlWidgets['connect']['closebutton']
+        closeButton.clicked.connect(self.closePushed)
+
+
+    @pyqtSlot()
+    def closePushed(self):
+        self.controller.close()
+
+    @pyqtSlot()
+    def loginPushed(self):
+        item = self.controlWidgets['login']
+        username = item['username'].text()
+        password = item['pass'].text()
+        checked = item['checkbox'].isChecked()
+        self.controller.login(username, password, checked)
+
+    @pyqtSlot()
+    def registerPushed(self):
+        item = self.controlWidgets['register']
+        username = item['username'].text()
+        password = item['pass'].text()
+        checked = item['checkbox'].isChecked()
+        self.controller.register(username, password, checked)
+
+    @pyqtSlot()
+    def connectPushed(self):
+        server = self.controlWidgets['connect']
+        self.controller.connect(server['ip'].text(), server['port'].text())
 
