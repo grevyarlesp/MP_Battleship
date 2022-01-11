@@ -9,6 +9,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS
         username TEXT UNIQUE NOT NULL, 
         password TEXT NOT NULL,
         fullname TEXT,
+        date DATE,
         note TEXT, 
         point INTEGER
         )

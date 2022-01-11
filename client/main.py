@@ -85,6 +85,7 @@ class App(QMainWindow):
                     },
                     'setup_info': {
                         'title' : 'User Info', 
+                        'username_label': QLabel(),
                         'label1' :QLabel('Fullname'),
                         'fullname_edit': QLineEdit(),
                         'label2' : QLabel('Date'),

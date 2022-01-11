@@ -98,6 +98,20 @@ class MyTabWidget(QWidget):
         closeButton = self.controlWidgets['connect']['closebutton']
         closeButton.clicked.connect(self.closePushed)
 
+        fetchButton = self.controlWidgets['connect']['fetch_button']
+
+        fetchButton.clicked.connect(self.fetchPushed)
+        updateButton = self.controlWidgets['connect']['update_button']
+        updateButton.clciked.connect(self.updatePushed)
+
+
+    @pyqtSlot()
+    def fetchPushed(self):
+        pass
+
+    @pyqtSlot()
+    def updatePushed(self):
+        pass
 
     @pyqtSlot()
     def closePushed(self):

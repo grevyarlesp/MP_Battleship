@@ -20,5 +20,34 @@ class Service:
         return res
 
     def login(self, username, password):
-        return True
+        query = f"""
+        SELECT username, password FROM ACCOUNTS
+        WHERE username = ?
+        """
+        self.db_cur.execute(query, (username, ))
+        row = self.db_cur.fetchone()
+        if (row is None):
+            return False, 'Username does not exists'
+        if (row[1] != password):
+            return False, 'Username exists, wrong password'
+        return True,  'Username and password correct'
+
+    def change_password(self, username, oldpass, newpass):
+        query = f""""
+            SELECT username, password FROM ACCOUNTS
+            WHERE username = ?
+        """
+        self.db_cur.execute(query, (username, ))
+
+    def get_user_info(self, username):
+        query = f"""
+            SELECT username, fullname, date, note, point FROM ACCOUNTS
+            WHERE username = ?
+        """
+        self.db_cur.execute(query, (username, ))
+        row = self.db_cur.fetchone()
+        if (row is None):
+            return False, 'Username does not exists'
+        return True, row
+
 

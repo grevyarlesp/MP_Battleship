@@ -17,6 +17,7 @@ class SocketWrapper():
         self.logger = logging.getLogger("Connection")
         self.logger.debug(self.port)
 
+
     def connect(self, remoteAddress, port):
         self.__socket = QTcpSocket()
 
@@ -44,7 +45,6 @@ class SocketWrapper():
     def disconnect(self):
         self.__socket.disconnectFromHost()
 
-
     def writeData(self, data):
         self.__socket.write(bytes(data, 'utf-8'))
 
@@ -58,3 +58,5 @@ class SocketWrapper():
     def __onDisconnected(self):
         self.logger.debug('Disconnected')
 
+    def check_connected(self):
+        return self.__socket.state() != QAbstractSocket.ConnectedState
