@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAc
 from PyQt5.QtGui import QPaintEvent, QPen, QColor, QPainter
 from PyQt5.QtCore import pyqtSlot, QEvent, QRectF, Qt
 
+from copy import copy
+
 
 SHOT_COUNT = 1
 AIM = 1009
@@ -128,27 +130,37 @@ class Board(QWidget):
             if (self.shotCount == 0):
                 return
             board_v[pos] = AIM
-            self.shotCount -= 1
+            self.shotCount = 0
             self.curAim = pos
         elif (event.button() == Qt.RightButton):
             if (board_v[pos] == AIM):
                 board_v[pos] = NOTHING
-                self.shotCount += 1
+                self.shotCount = 1
                 self.curAim = None
         self.update()
 
     def setBoard(self, ships):
-        self.board_v = ships
+        self.board_v = copy(ships)
+        self.update()
 
     def clear(self):
         for i in range(len(self.board_v)):
             self.board_v[i] = NOTHING
         self.shotCount = SHOT_COUNT
+        self.curAim = None
         self.update()
 
     def getAiming(self):
-        return self.curAim
+        pos = self.curAim
+        self.board_v[pos] = NOTHING
+        self.curAim = None
+        self.update()
+        return pos
+
 
     def resetShotCount(self):
         self.shotCount = SHOT_COUNT
+
+    def checkCellEmpty(self, pos):
+        return self.board_v[pos] == 0
 

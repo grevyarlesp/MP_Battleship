@@ -9,6 +9,8 @@ import time
 
 from GameThread import GameThread
 
+from utils import to_json_dumps
+
 class  ClientThread(threading.Thread):
     def __init__(self, clientAddress, clientsocket, server):
         threading.Thread.__init__(self)
@@ -28,7 +30,7 @@ class  ClientThread(threading.Thread):
                     'type': 'status',
                     'mes': m
             }
-        data = json.dumps(m)
+        data = to_json_dumps(m)
         self.csocket.send(bytes(data, 'utf-8'))
 
     def run(self):
@@ -36,16 +38,27 @@ class  ClientThread(threading.Thread):
         self.dbservice = DBService()
         msg = ''
         while True:
-            while (self.server.checkInGame(self.cur_user)):
-                time.sleep(60)
-            data = self.csocket.recv(2048)
-            msg = data.decode()
-            if msg=='close' or not msg:
-                break
-            print ("from client", msg)
-            m = json.loads(msg)
+            if (self.server.checkInGame(self.cur_user)):
+                time.sleep(2)
+                continue
 
-            self.control_handler(m)
+            data = self.csocket.recv(2048).decode()
+            if (not data):
+                break
+            msgs = data.split('|')
+
+            term = False
+            for msg in msgs:
+                if (not msg):
+                    continue
+                if msg=='close':
+                    term = True
+                    break
+                print ("from client", msg)
+                m = json.loads(msg)
+                self.control_handler(m)
+            if (term):
+                break
 
             # if in game -> hand control to other thread
 
@@ -90,7 +103,7 @@ class  ClientThread(threading.Thread):
                     'type': 'status',
                     'mes': m
                 }
-            data = json.dumps(m)
+            data = to_json_dumps(m)
             self.csocket.send(bytes(data, 'utf-8'))
         else:
             # Login successful
@@ -121,7 +134,8 @@ class  ClientThread(threading.Thread):
             'point' : str(m[4] or ''),
             'online': online
                 }
-        data = json.dumps(m)
+
+        data = to_json_dumps(m)
         print(data)
         self.csocket.send(bytes(data, 'utf-8'))
 
@@ -139,7 +153,8 @@ class  ClientThread(threading.Thread):
                 'type': 'status',
                 'mes': m
             }
-        data = json.dumps(m)
+        data = to_json_dumps(m)
+
         self.csocket.send(bytes(data, 'utf-8'))
 
     def change_password(self, username, oldpass, newpass, enc):
@@ -169,7 +184,7 @@ class  ClientThread(threading.Thread):
                 'type' : 'online_users',
                 'users': t
                 }
-        data = json.dumps(m)
+        data = to_json_dumps(m)
         self.csocket.send(bytes(data, 'utf-8'))
 
     def invite_and_start_game(self, m):
@@ -192,7 +207,8 @@ class  ClientThread(threading.Thread):
                 'from' : _from
                 }
 
-        data = json.dumps(m)
+
+        data = to_json_dumps(m)
         sock.send(bytes(data, 'utf-8'))
 
         self.server.setInGame(rep)
@@ -210,5 +226,5 @@ class  ClientThread(threading.Thread):
                 'rep' : rep,
                 'from' : _from
                 }
-        data = json.dumps(m)
+        data = to_json_dumps(m)
         sock.send(bytes(data, 'utf-8'))

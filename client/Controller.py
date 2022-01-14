@@ -28,6 +28,7 @@ class Controller():
         self.enemyBoard = self.widgetsDict['EnemyBoard']
         self.ingame = False
 
+
         # Own turn: 1, 0, op turn
         self.turn = False
         self.turnlabel = self.widgetsDict['turnlabel']
@@ -59,8 +60,9 @@ class Controller():
         return not self.ingame
 
 
-
     def loadShip(self, fileName):
+        if not fileName:
+            return False, None
         file = open(fileName)
         csvreader = csv.reader(file)
         rows = []
@@ -74,11 +76,11 @@ class Controller():
         return True, rows
 
     def send_no_wait(self, m):
-        data = json.dumps(m)
+        data = json.dumps(m) + '|'
         self.con.writeData(data)
     
     def send_and_wait(self, m):
-        data = json.dumps(m)
+        data = json.dumps(m) + '|'
         self.con.writeData(data)
         self.con.waitForReadyRead()
 
@@ -281,14 +283,15 @@ class Controller():
             return
 
         pos = self.enemyBoard.getAiming()
+        if (pos is None):
+            return
         m = {
                 'type' : 'shoot',
                 'pos' : pos
                 }
-        print(m)
+
         self.enemyBoard.resetShotCount()
         self.send_no_wait(m)
-
 
     def acceptInvite(self, rep, _from):
         self.ingame = True 
@@ -363,8 +366,10 @@ class Controller():
             """
             _from = msg['from']
             rep = msg['rep']
-            reply = QMessageBox.question(None, 'Invitation', text, QMessageBox.Yes, QMessageBox.No)
-            if (reply == QMessageBox.Yes):
+
+            reply = displayYesNoBox('Invitation', text)
+
+            if (reply):
                 self.acceptInvite(rep, _from)
             else:
                 self.declineInvite(rep, _from)
@@ -372,15 +377,16 @@ class Controller():
         if (t == 'rep_accept'):
             # The recipient accepted your invitation
             self.ingame = True
+            self.playerBoard.setBoard(self.ship)
+            self.enemyBoard.clear()
             rep = msg['rep']
             self.setTurn(True)
             displayMessageBox('INFO', f'{rep} accepted')
 
         if (t == 'rep_decline'):
             self.ingame = False
-            displayMessageBox('INFO', 'Declined')
             rep = msg['rep']
-            displayMessageBox('INFO', f'{rep} accepted')
+            displayMessageBox('INFO', f'{rep} declined')
 
     # Handler if the user is in game
     def gameHandler(self, msg):
@@ -414,15 +420,14 @@ class Controller():
             win = msg['win']
             text = ''
             if (win == self.cur_user):
-                text = 'You win!'
+                text = 'You win! Rematch?'
             else:
-                text = 'You lose!'
+                text = 'You lose! Rematch?'
             want = displayYesNoBox('Rematch', text)
 
             if (want):
                 # want a rematch
                 self.rematch_accept()
-                pass
             else:
                 # don't want
                 self.rematch_decline()
@@ -432,6 +437,8 @@ class Controller():
             user = msg['user1']
             self.ingame = True
             self.playerBoard.setBoard(self.ship)
+            self.enemyBoard.clear()
+
             if (user == self.cur_user):
                 self.setTurn(True)
             else:
@@ -441,6 +448,7 @@ class Controller():
             self.ingame = False
 
     def rematch_decline(self):
+        print('Declined a rematch')
         m = {'type' : 'rematch_decline',
                 'user':self.cur_user
                 }

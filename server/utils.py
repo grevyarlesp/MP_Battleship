@@ -31,3 +31,8 @@ def bfs(board, pos, val):
                 q.append(v)
     return ret
 
+def to_json_dumps(msg):
+    return json.dumps(msg) + '|'
+
+def load_msg(msg):
+    return msg.split('|')

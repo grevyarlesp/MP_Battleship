@@ -19,8 +19,6 @@ class SocketWrapper():
         self.logger = logging.getLogger("Connection")
         self.logger.debug(self.port)
 
-
-
     def connect(self, remoteAddress, port):
         self.__socket = QTcpSocket()
 
@@ -52,8 +50,11 @@ class SocketWrapper():
         self.__socket.write(bytes(data, 'utf-8'))
 
     def readyRead(self):
-        msg = str(self.__socket.readAll(), 'utf-8')
-        self.controller.handler(msg)
+        msgs = str(self.__socket.readAll(), 'utf-8').split('|')
+        for msg in msgs:
+            if (not msg):
+                continue
+            self.controller.handler(msg)
 
     def waitForReadyRead(self):
         self.__socket.waitForReadyRead()

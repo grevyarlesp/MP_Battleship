@@ -9,5 +9,5 @@ def displayMessageBox(title, message):
 
 def displayYesNoBox(title, message):
     reply = QMessageBox.question(None, title, message, QMessageBox.Yes, QMessageBox.No)
-    return reply
+    return (reply == QMessageBox.Yes)
 

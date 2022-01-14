@@ -2,6 +2,7 @@ import sqlite3
 import threading
 import socket
 import json
+from copy import copy
 
 from utils import *
 
@@ -23,7 +24,7 @@ class Server:
 
     def unsetInGame(self, username):
         with self._lock:
-            self._ingame.remove(username)
+            self._ingame.discard(username)
 
     def checkInGame(self, username):
         with self._lock:
@@ -31,7 +32,7 @@ class Server:
 
     def getBoard(self, username):
         with self._lock:
-            return self.boards[username]
+            return copy(self.boards[username])
 
     def addOnline(self, username, sock : socket.socket):
         with self._lock:

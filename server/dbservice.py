@@ -1,5 +1,5 @@
 import sqlite3
-import threading
+
 class DBService:
     def __init__(self):
         self.db = sqlite3.connect('storage.db')
@@ -82,7 +82,7 @@ class DBService:
 
     def update_point_add_1(self, username):
         query = f"""
-            SELECT username, point
+            SELECT username, point FROM ACCOUNTS
             WHERE username = ?
         """
         self.db_cur.execute(query, (username, ))
@@ -101,6 +101,7 @@ class DBService:
         try:
             self.db_cur.execute(query, (point, username))
         except sqlite3.Error as err:
+            print("DB error in update point")
             return False
         self.db.commit()
 
