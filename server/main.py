@@ -3,7 +3,7 @@ from ClientThread import ClientThread
 from Server import Server
 
 PORT = 55342
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 
 def main():
     serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
