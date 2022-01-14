@@ -3,6 +3,8 @@ import sys
 import logging
 import time
 
+from utils import *
+
 """
 Managing connections, sending message...
 """
@@ -16,6 +18,7 @@ class SocketWrapper():
         self.controller = controller
         self.logger = logging.getLogger("Connection")
         self.logger.debug(self.port)
+
 
 
     def connect(self, remoteAddress, port):
@@ -58,5 +61,5 @@ class SocketWrapper():
     def __onDisconnected(self):
         self.logger.debug('Disconnected')
 
-    def check_connected(self):
+    def check_not_connected(self):
         return self.__socket.state() != QAbstractSocket.ConnectedState

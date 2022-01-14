@@ -8,6 +8,7 @@ SHOT_COUNT = 1
 AIM = 1009
 NOTHING = 0
 HIT = 1001
+MISS = 1002
 
 SHIP_COLORS = {
         1: Qt.yellow,
@@ -24,6 +25,11 @@ SHIP_COLORS = {
         12: Qt.green,
         }
 
+STATUS_COLORS = {
+        MISS : Qt.black, 
+        HIT: Qt.red
+        }
+
 
 class Board(QWidget):
     def __init__(self, clickable : bool, color = Qt.blue):
@@ -34,7 +40,18 @@ class Board(QWidget):
         self.gridColor = color
         self.shotCount = SHOT_COUNT
 
-        self.waiting = False
+        self.curAim = None
+
+    def size(self):
+        return self.board_sz
+
+    def setHit(self, pos):
+        self.board_v[pos] = HIT
+        self.update()
+
+    def setMiss(self, pos):
+        self.board_v[pos] = MISS
+        self.update()
 
     def boundingRect(self):
         return QRectF(0, 0, self.x, self.y)
@@ -67,14 +84,18 @@ class Board(QWidget):
         board_v = self.board_v
         for x in range(self.board_sz):
             for y in range(self.board_sz):
-                if (board_v[y * board_sz + x] == AIM):
+                val = board_v[y * board_sz + x]
+                if (val == AIM):
                     p.setPen(Qt.red)
                     p.drawEllipse(x * m_GridDistance + 1, y * m_GridDistance + 1, m_GridDistance - 2, m_GridDistance - 2)
                     p.drawLine(x * m_GridDistance, y * m_GridDistance + t, x * m_GridDistance + m_GridDistance, y * m_GridDistance + t)
                     p.drawLine(x * m_GridDistance + t, y * m_GridDistance, x * m_GridDistance + t, y * m_GridDistance + m_GridDistance)
                 
-                if (self.board_v[y * board_sz + x] >= 1 and self.board_v[y * board_sz + x] <= 12):
-                    p.fillRect(x * m_GridDistance + 1, y * m_GridDistance + 1, m_GridDistance - 1, m_GridDistance - 1, SHIPS_COLORS[board_v[y * board_sz + x]]);
+                if (val >= 1 and val <= 12):
+                    p.fillRect(x * m_GridDistance + 1, y * m_GridDistance + 1, m_GridDistance - 1, m_GridDistance - 1, SHIP_COLORS[val]);
+
+                if (val == HIT or val == MISS):
+                    p.fillRect(x * m_GridDistance + 1, y * m_GridDistance + 1, m_GridDistance - 1, m_GridDistance - 1, STATUS_COLORS[val]);
 
         if (self.clickable):
             last_y = int(m_GridDistance * self.board_sz) + 20
@@ -82,8 +103,6 @@ class Board(QWidget):
             p.drawText(last_x, last_y, str(self.shotCount))
 
     def mouseReleaseEvent(self, event):
-        if (self.waiting):
-            return
         if (not self.clickable):
             return
 
@@ -110,18 +129,26 @@ class Board(QWidget):
                 return
             board_v[pos] = AIM
             self.shotCount -= 1
+            self.curAim = pos
         elif (event.button() == Qt.RightButton):
             if (board_v[pos] == AIM):
                 board_v[pos] = NOTHING
                 self.shotCount += 1
+                self.curAim = None
         self.update()
 
-    def toggleWaiting(self):
-        self.waiting = not self.waiting
+    def setBoard(self, ships):
+        self.board_v = ships
 
     def clear(self):
         for i in range(len(self.board_v)):
             self.board_v[i] = NOTHING
         self.shotCount = SHOT_COUNT
         self.update()
+
+    def getAiming(self):
+        return self.curAim
+
+    def resetShotCount(self):
+        self.shotCount = SHOT_COUNT
 

@@ -105,7 +105,8 @@ class App(QMainWindow):
 
                 },
                 'PlayerBoard': Board(clickable = False, color = Qt.blue),
-                'EnemyBoard': Board(clickable = True, color = Qt.red)
+                'EnemyBoard': Board(clickable = True, color = Qt.red),
+                'turnlabel' : QLabel()
                 }
 
         self.widgetsDict['control']['login']['pass'].setEchoMode(QLineEdit.Password)

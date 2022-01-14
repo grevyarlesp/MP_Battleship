@@ -1,53 +1,68 @@
 import sqlite3
+import threading
+import socket
+import json
 
-class Service:
+from utils import *
+
+class Server:
     def __init__(self):
-        self.db = sqlite3.connect('storage.db')
-        self.db_cur = self.db.cursor()
+        self._lock = threading.Lock()
+        self._online = {}
+        self.boards = {}
 
-    def register(self, username, password):
-        query = f"""
-        INSERT INTO ACCOUNTS(username, password) 
-        VALUES ('{username}', '{password}');
-        """
-        # print(query)
-        res = True
-        try:
-            self.db_cur.execute(query)
-        except sqlite3.Error as err:
-            res = False
-        self.db.commit()
-        return res
+        self._ingame = set()
 
-    def login(self, username, password):
-        query = f"""
-        SELECT username, password FROM ACCOUNTS
-        WHERE username = ?
-        """
-        self.db_cur.execute(query, (username, ))
-        row = self.db_cur.fetchone()
-        if (row is None):
-            return False, 'Username does not exists'
-        if (row[1] != password):
-            return False, 'Username exists, wrong password'
-        return True,  'Username and password correct'
+    def setBoard(self, username, board):
+        with self._lock:
+            self.boards[username] = board
 
-    def change_password(self, username, oldpass, newpass):
-        query = f""""
-            SELECT username, password FROM ACCOUNTS
-            WHERE username = ?
-        """
-        self.db_cur.execute(query, (username, ))
+    def setInGame(self, username):
+        with self._lock:
+            self._ingame.add(username)
 
-    def get_user_info(self, username):
-        query = f"""
-            SELECT username, fullname, date, note, point FROM ACCOUNTS
-            WHERE username = ?
-        """
-        self.db_cur.execute(query, (username, ))
-        row = self.db_cur.fetchone()
-        if (row is None):
-            return False, 'Username does not exists'
-        return True, row
+    def unsetInGame(self, username):
+        with self._lock:
+            self._ingame.remove(username)
+
+    def checkInGame(self, username):
+        with self._lock:
+            return username in self._ingame
+
+    def getBoard(self, username):
+        with self._lock:
+            return self.boards[username]
+
+    def addOnline(self, username, sock : socket.socket):
+        with self._lock:
+            self._online[username] = sock
+
+    def removeOnline(self, username):
+        with self._lock:
+            self._online.pop(username, None)
+
+    def checkOnline(self, username):
+        with self._lock:
+            return username in self._online
+
+    def getOnlineUsers(self):
+        with self._lock:
+            return list(self._online.keys())
+
+    def getSock(self, user):
+        with self._lock:
+            return self._online[user]
 
 
+    # user 1 invite user 2
+    def sendInvitation(self, user1, user2):
+        with self._lock:
+            sock1 = self._online[user1]
+            sock2 = self._online[user2]
+            m =  {
+                'type' : 'invite',
+                'rep' : user2,
+                'from' : user1
+                    }
+            data = json.dumps(m)
+            sock2.send(bytes(data, 'utf-8'))

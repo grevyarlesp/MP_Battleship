@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout,QHBoxLayout, QLabel,QListWidget, QListWidgetItem, QTreeWidget, QTreeWidgetItem, QGridLayout, QGroupBox
 from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import Qt
+
 
 class MyTabWidget(QWidget):
     def __init__(self, parent, widgetsDict, controller):
@@ -31,6 +33,7 @@ class MyTabWidget(QWidget):
     def GameViewInit(self):
         board1 = self.widgetsDict['PlayerBoard']
         board2 = self.widgetsDict['EnemyBoard']
+        turnlabel = self.widgetsDict['turnlabel']
 
         wl1 = QVBoxLayout()
         wl2 = QVBoxLayout()
@@ -43,11 +46,16 @@ class MyTabWidget(QWidget):
         self.tab2layout.addWidget(w1)
         self.tab2layout.addWidget(w2)
 
+
         w1.setLayout(wl1)
         w2.setLayout(wl2)
 
-        wl1.addWidget(board1)
+
+        wl1.addWidget(board1, stretch = 20)
+        wl1.addWidget(turnlabel, stretch = 2)
         wl2.addWidget(board2)
+
+
 
     def ControlViewInit(self):
         self.tab1layout = QHBoxLayout()
@@ -56,6 +64,7 @@ class MyTabWidget(QWidget):
 
         count = 0
 
+        cur_layout = QVBoxLayout()
 
         for key, group in tabWidgets.items():
             if (count % 2 == 0):
@@ -98,20 +107,35 @@ class MyTabWidget(QWidget):
         closeButton = self.controlWidgets['connect']['closebutton']
         closeButton.clicked.connect(self.closePushed)
 
-        fetchButton = self.controlWidgets['connect']['fetch_button']
+        fetchButton = self.controlWidgets['setup_info']['fetch_button']
 
         fetchButton.clicked.connect(self.fetchPushed)
-        updateButton = self.controlWidgets['connect']['update_button']
-        updateButton.clciked.connect(self.updatePushed)
+        updateButton = self.controlWidgets['setup_info']['update_button']
+        updateButton.clicked.connect(self.updatePushed)
+
+        checkButton = self.controlWidgets['check_user']['button']
+        checkButton.clicked.connect(self.checkPushed)
+
+        changeButton = self.controlWidgets['change_password']['button']
+        changeButton.clicked.connect(self.changePushed)
+
+        refreshOnlineButton = self.controlWidgets['startgame']['refreshbutton']
+        refreshOnlineButton.clicked.connect(self.refreshPushed)
+
+        startGameButton = self.controlWidgets['startgame']['startbutton']
+        startGameButton.clicked.connect(self.startGamePushed)
+
+        uploadshipButton = self.controlWidgets['startgame']['uploadshipbutton']
+        uploadshipButton.clicked.connect(self.uploadShipPushed)
 
 
     @pyqtSlot()
     def fetchPushed(self):
-        pass
+        self.controller.fetch()
 
     @pyqtSlot()
     def updatePushed(self):
-        pass
+        self.controller.update()
 
     @pyqtSlot()
     def closePushed(self):
@@ -138,3 +162,26 @@ class MyTabWidget(QWidget):
         server = self.controlWidgets['connect']
         self.controller.connect(server['ip'].text(), server['port'].text())
 
+    @pyqtSlot()
+    def checkPushed(self):
+        self.controller.check_user()
+
+    @pyqtSlot()
+    def changePushed(self):
+        self.controller.change_password()
+
+    @pyqtSlot()
+    def refreshPushed(self):
+        self.controller.refreshOnlineUsers()
+
+    @pyqtSlot()
+    def startGamePushed(self):
+        self.controller.startGame()
+
+    @pyqtSlot()
+    def uploadShipPushed(self):
+        self.controller.uploadShip()
+
+    def keyPressEvent(self, event):
+        if (event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return):
+            self.controller.shoot()
