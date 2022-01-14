@@ -1,4 +1,3 @@
-from os import wait
 from PyQt5.QtCore import pyqtSlot, Qt
 from socketwrapper import SocketWrapper
 import sys
