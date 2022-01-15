@@ -57,7 +57,7 @@ class SocketWrapper():
             self.controller.handler(msg)
 
     def waitForReadyRead(self):
-        self.__socket.waitForReadyRead()
+        self.__socket.waitForReadyRead(msec = 5000)
 
     def __onDisconnected(self):
         self.logger.debug('Disconnected')
